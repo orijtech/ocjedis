@@ -46,6 +46,9 @@ dependencies {
     compile "io.opencensus:opencensus-api:${opencensusVersion}"
     runtime "io.opencensus:opencensus-impl:${opencensusVersion}"
 
+    // https://mvnrepository.com/artifact/redis.clients/jedis
+    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+
     compileOnly "com.google.code.findbugs:jsr305:${findBugsJsr305Version}"
     compileOnly "com.google.errorprone:error_prone_annotations:${errorProneVersion}"
 
