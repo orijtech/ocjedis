@@ -35,7 +35,6 @@ import io.opencensus.trace.Status;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.util.Arrays;
-import javax.annotation.Nullable;
 
 public class Observability {
 
@@ -169,7 +168,7 @@ public class Observability {
     private final Span span;
     private final long startTimeNs;
     private final String method;
-    private final String key;
+    private final String[] keys;
     private boolean closed;
     private String recordedError;
 
@@ -178,20 +177,20 @@ public class Observability {
     private final Tracer tracer;
 
     TrackingOperation(String method) {
-      this(method, null, Observability.statsRecorder, Observability.tagger, Observability.tracer);
+      this(method, Observability.statsRecorder, Observability.tagger, Observability.tracer);
     }
 
-    TrackingOperation(String method, @Nullable String key) {
-      this(method, key, Observability.statsRecorder, Observability.tagger, Observability.tracer);
+    TrackingOperation(String method, String... keys) {
+      this(method, Observability.statsRecorder, Observability.tagger, Observability.tracer, keys);
     }
 
     // VisibleForTesting
     TrackingOperation(
-        String method, String key, StatsRecorder statsRecorder, Tagger tagger, Tracer tracer) {
+        String method, StatsRecorder statsRecorder, Tagger tagger, Tracer tracer, String... keys) {
       startTimeNs = System.nanoTime();
       span = tracer.spanBuilder(method).startSpan();
       this.method = method;
-      this.key = key;
+      this.keys = keys;
       this.statsRecorder = statsRecorder;
       this.tagger = tagger;
       this.tracer = tracer;
@@ -224,8 +223,8 @@ public class Observability {
         MeasureMap measureMap = statsRecorder.newMeasureMap();
 
         // Record the key length if applicable.
-        if (key != null) {
-          measureMap.put(Observability.MEASURE_DATA_TRANSFERRED, key.length());
+        for (String key : keys) {
+          if (key != null) measureMap.put(Observability.MEASURE_DATA_TRANSFERRED, key.length());
         }
 
         // Record the latency.
@@ -254,5 +253,9 @@ public class Observability {
 
   static TrackingOperation createRoundtripTrackingSpan(String method, String key) {
     return new TrackingOperation(method, key);
+  }
+
+  static TrackingOperation createRoundtripTrackingSpan(String method, String... keys) {
+    return new TrackingOperation(method, keys);
   }
 }
