@@ -19,9 +19,11 @@ import io.orijtech.integrations.ocjedis.Observability.TrackingOperation;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import redis.clients.jedis.BinaryClient;
 import redis.clients.jedis.BitOP;
 import redis.clients.jedis.BitPosParams;
 import redis.clients.jedis.GeoCoordinate;
@@ -29,11 +31,18 @@ import redis.clients.jedis.GeoRadiusResponse;
 import redis.clients.jedis.GeoUnit;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.SortingParams;
 import redis.clients.jedis.Tuple;
 import redis.clients.jedis.ZParams;
+import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.jedis.params.sortedset.ZAddParams;
+import redis.clients.jedis.params.sortedset.ZIncrByParams;
+import redis.clients.util.Pool;
+import redis.clients.util.Slowlog;
 
 public class OcWrapJedis extends Jedis {
 
@@ -1212,6 +1221,2739 @@ public class OcWrapJedis extends Jedis {
   }
 
   @Override
+  public List<GeoRadiusResponse> georadius(
+      String key,
+      double longitude,
+      double latitude,
+      double radius,
+      GeoUnit unit,
+      GeoRadiusParam param) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#georadius-java.lang.String-double-double-double-redis.clients.jedis.GeoUnit-redis.clients.jedis.params.geo.GeoRadiusParam-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.georadius", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.georadius(key, longitude, latitude, radius, unit, param);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<GeoRadiusResponse> georadiusByMember(
+      String key, String member, double radius, GeoUnit unit) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#georadiusByMember-java.lang.String-java.lang.String-double-redis.clients.jedis.GeoUnit-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.georadiusByMember", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.georadiusByMember(key, member, radius, unit);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<GeoRadiusResponse> georadiusByMember(
+      String key, String member, double radius, GeoUnit unit, GeoRadiusParam param) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#georadiusByMember-java.lang.String-java.lang.String-double-redis.clients.jedis.GeoUnit-redis.clients.jedis.params.geo.GeoRadiusParam-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.georadiusByMember", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.georadiusByMember(key, member, radius, unit, param);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String get(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#get-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.get", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.get(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean getbit(String key, long offset) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#getbit-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.getbit", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.getbit(key, offset);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String getrange(String key, long startOffset, long endOffset) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#getrange-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.getrange", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.getrange(key, startOffset, endOffset);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String getSet(String key, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#getSet-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.getSet", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.getSet(key, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long hdel(String key, String... fields) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hdel-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hdel", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hdel(key, fields);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean hexists(String key, String field) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hexists-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hexists", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hexists(key, field);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String hget(String key, String field) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hget-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hget", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hget(key, field);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Map<String, String> hgetAll(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hgetAll-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hgetAll", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hgetAll(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long hincrBy(String key, String field, long value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hincrBy-java.lang.String-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hincrBy", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hincrBy(key, field, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Double hincrByFloat(String key, String field, double value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hincrByFloat-java.lang.String-java.lang.String-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hincrByFloat", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hincrByFloat(key, field, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> hkeys(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hkeys-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hkeys", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hkeys(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long hlen(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hlen-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hlen", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hlen(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> hmget(String key, String... fields) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hmget-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hmget", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hmget(key, fields);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<Map.Entry<String, String>> hscan(String key, String cursor) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hscan-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hscan", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hscan(key, cursor);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<Map.Entry<String, String>> hscan(String key, String cursor, ScanParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hscan-java.lang.String-java.lang.String-redis.clients.jedis.ScanParams-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hscan", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hscan(key, cursor, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long hset(String key, String field, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hset-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hset", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hset(key, field, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long hsetnx(String key, String field, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hsetnx-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hsetnx", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hsetnx(key, field, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> hvals(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#hvals-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.hvals", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.hvals(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long incr(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#incr-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.incr", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.incr(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long incrBy(String key, long integer) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#incrBy-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.incrBy", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.incrBy(key, integer);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Double incrByFloat(String key, double value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#incrByFloat-java.lang.String-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.incrByFloat", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.incrByFloat(key, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> keys(String pattern) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#keys-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.keys", pattern);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.keys(pattern);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String lindex(String key, long index) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lindex-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lindex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lindex(key, index);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long linsert(String key, BinaryClient.LIST_POSITION where, String pivot, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#linsert-java.lang.String-redis.clients.jedis.BinaryClient.LIST_POSITION-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.linsert", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.linsert(key, where, pivot, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long llen(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#llen-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.llen", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.llen(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String lpop(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lpop-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lpop", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lpop(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long lpush(String key, String... strings) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lpush-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lpush", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lpush(key, strings);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long lpushx(String key, String... strings) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lpushx-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lpushx", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lpushx(key, strings);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> lrange(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lrange-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lrange", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lrange(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long lrem(String key, long count, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lrem-java.lang.String-long-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lrem", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lrem(key, count, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String lset(String key, long index, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#lset-java.lang.String-long-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.lset", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.lset(key, index, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String ltrim(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#ltrim-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.ltrim", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.ltrim(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> mget(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#mget-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.mget", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.mget(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String migrate(String host, int port, String key, int destinationDb, int timeout) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#migrate-java.lang.String-int-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.migrate", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.migrate(host, port, key, destinationDb, timeout);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long move(String key, int dbIndex) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#move-java.lang.String-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.move", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.move(key, dbIndex);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String mset(String... keysvalues) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#mset-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.mset", keysvalues);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.mset(keysvalues);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long msetnx(String... keysvalues) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#msetnx-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.msetnx", keysvalues);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.msetnx(keysvalues);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String objectEncoding(String string) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#objectEncoding-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.objectEncoding", string);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.objectEncoding(string);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long objectIdletime(String string) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#objectIdletime-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.objectIdletime", string);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.objectIdletime(string);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long objectRefcount(String string) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#objectRefcount-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.objectRefcount", string);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.objectRefcount(string);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long persist(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#persist-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.persist", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.persist(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long pexpire(String key, long milliseconds) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pexpire-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pexpire", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pexpire(key, milliseconds);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long pexpireAt(String key, long millisecondsTimestamp) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pexpireAt-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pexpireAt", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pexpireAt(key, millisecondsTimestamp);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long pfadd(String key, String... elements) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pfadd-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pfadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pfadd(key, elements);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public long pfcount(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pfcount-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pfcount", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pfcount(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public long pfcount(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pfcount-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pfcount", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pfcount(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String pfmerge(String destkey, String... sourcekeys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pfmerge-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pfmerge", destkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pfmerge(destkey, sourcekeys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String psetex(String key, long milliseconds, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#psetex-java.lang.String-long-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.psetex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.psetex(key, milliseconds, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public void psubscribe(JedisPubSub jedisPubSub, String... patterns) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#psubscribe-redis.clients.jedis.JedisPubSub-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.psubscribe", patterns);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      super.psubscribe(jedisPubSub, patterns);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long pttl(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pttl-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pttl", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pttl(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long publish(String channel, String message) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#publish-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.publish", channel, message);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.publish(channel, message);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> pubsubChannels(String pattern) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pubsubChannels-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.pubsubChannels", pattern);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pubsubChannels(pattern);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long pubsubNumPat() {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pubsubNumPat--
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.pubsubNumPat");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pubsubNumPat();
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Map<String, String> pubsubNumSub(String... channels) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#pubsubNumSub-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.pubsubNumSub", channels);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.pubsubNumSub(channels);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String randomKey() {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#randomKey--
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.randomKey");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.randomKey();
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String readonly() {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#readonly--
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.readonly");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.readonly();
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String rename(String oldkey, String newkey) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#rename-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.rename", oldkey, newkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.rename(oldkey, newkey);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long renamenx(String oldkey, String newkey) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#renamenx-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.renamenx", oldkey, newkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.renamenx(oldkey, newkey);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String restore(String key, int ttl, byte[] serializedValue) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#restore-java.lang.String-int-byte:A-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.restore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.restore(key, ttl, serializedValue);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String rpoplpush(String srckey, String dstkey) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#rpoplpush-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.rpoplpush", srckey, dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.rpoplpush(srckey, dstkey);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long rpush(String key, String... strings) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#rpush-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.rpush", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.rpush(key, strings);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long rpushx(String key, String... strings) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#rpushx-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.rpushx", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.rpushx(key, strings);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sadd(String key, String... members) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sadd-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sadd(key, members);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<String> scan(String cursor) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scan-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scan", cursor);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scan(cursor);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<String> scan(String cursor, ScanParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scan-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scan", cursor);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scan(cursor, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long scard(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scard-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scard", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scard(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<Boolean> scriptExists(String... sha1s) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scriptExists-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scriptExists", sha1s);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scriptExists(sha1s);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean scriptExists(String sha1) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scriptExists-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scriptExists", sha1);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scriptExists(sha1);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String scriptLoad(String script) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#scriptLoad-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.scriptLoad", script);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.scriptLoad(script);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> sdiff(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sdiff-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sdiff", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sdiff(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sdiffstore(String dstkey, String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sdiffstore-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sdiffstore", dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sdiffstore(dstkey, keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String sentinelFailover(String masterName) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelFailover-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelFailover", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelFailover(masterName);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> sentinelGetMasterAddrByName(String masterName) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelGetMasterAddrByName-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelGetMasterAddrByName", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelGetMasterAddrByName(masterName);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<Map<String, String>> sentinelMasters() {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelMasters--
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sentinelMasters");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelMasters();
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String sentinelMonitor(String masterName, String ip, int port, int quorum) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelMonitor-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelMonitor", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelMonitor(masterName, ip, port, quorum);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String sentinelRemove(String masterName) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelRemove-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelRemove", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelRemove(masterName);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sentinelReset(String pattern) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelReset-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelReset", pattern);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelReset(pattern);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String sentinelSet(String masterName, Map<String, String> parameterMap) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelSet-java.lang.String-java.util.Map-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelSet", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelSet(masterName, parameterMap);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<Map<String, String>> sentinelSlaves(String masterName) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sentinelSlaves-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.sentinelSlaves", masterName);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sentinelSlaves(masterName);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String set(String key, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#set-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.set", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.set(key, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String set(String key, String value, String nxxx) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#set-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.set", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.set(key, value, nxxx);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String set(String key, String value, String nxxx, String expx, int time) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#set-java.lang.String-java.lang.String-java.lang.String-java.lang.String-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.set", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.set(key, value, nxxx, expx, time);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String set(String key, String value, String nxxx, String expx, long time) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#set-java.lang.String-java.lang.String-java.lang.String-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.set", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.set(key, value, nxxx, expx, time);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean setbit(String key, long offset, boolean value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setbit-java.lang.String-long-boolean-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setbit", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.setbit(key, offset, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean setbit(String key, long offset, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setbit-java.lang.String-long-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setbit", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.setbit(key, offset, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public void setDataSource(Pool<Jedis> jedisPool) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setDataSource-redis.clients.util.Pool-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setDataSource");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      super.setDataSource(jedisPool);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String setex(String key, int seconds, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setex-java.lang.String-int-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setex");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.setex(key, seconds, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long setnx(String key, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setnx-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setnx");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.setnx(key, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long setrange(String key, long offset, String value) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#setrange-java.lang.String-long-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.setrange", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.setrange(key, offset, value);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> sinter(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sinter-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sinter", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sinter(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sinterstore(String dstkey, String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sinterstore-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sinterstore", dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sinterstore(dstkey, keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Boolean sismember(String key, String member) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sismember-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sismember", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sismember(key, member);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<Slowlog> slowlogGet() {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#slowlogGet--
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.slowlogGet");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.slowlogGet();
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<Slowlog> slowlogGet(long entries) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#slowlogGet-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.slowlogGet");
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.slowlogGet(entries);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> smembers(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#smembers-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.smembers", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.smembers(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long smove(String srckey, String dstkey, String member) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#smove-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.smove", srckey, dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.smove(srckey, dstkey, member);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> sort(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sort-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sort", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sort(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> sort(String key, SortingParams sortingParameters) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sort-java.lang.String-redis.clients.jedis.SortingParams-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sort", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sort(key, sortingParameters);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sort(String key, SortingParams sortingParameters, String dstkey) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sort-java.lang.String-redis.clients.jedis.SortingParams-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sort", key, dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sort(key, sortingParameters, dstkey);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sort(String key, String dstkey) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sort-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sort", key, dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sort(key, dstkey);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String spop(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#spop-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.spop", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.spop(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> spop(String key, long count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#spop-java.lang.String-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.spop", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.spop(key, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String srandmember(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#srandmember-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.srandmember", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.srandmember(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public List<String> srandmember(String key, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#srandmember-java.lang.String-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.srandmember", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.srandmember(key, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long srem(String key, String... members) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#srem-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.srem", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.srem(key, members);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<String> sscan(String key, String cursor) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sscan-java.lang.String-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sscan", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sscan(key, cursor);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public ScanResult<String> sscan(String key, String cursor, ScanParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sscan-java.lang.String-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sscan", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sscan(key, cursor, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long strlen(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#strlen-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.strlen", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.strlen(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public void subscribe(JedisPubSub jedisPubSub, String... channels) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#subscribe-redis.clients.jedis.JedisPubSub-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.subscribe", channels);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      super.subscribe(jedisPubSub, channels);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String substr(String key, int start, int end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#substr-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.substr", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.substr(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> sunion(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sunion-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sunion", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sunion(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long sunionstore(String dstkey, String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#sunionstore-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.sunionstore", dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.sunionstore(dstkey, keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long ttl(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#ttl-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.ttl", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.ttl(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String type(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#type-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.type", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.type(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public String watch(String... keys) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#watch-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.watch", keys);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.watch(keys);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zadd(String key, double score, String member) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zadd-java.lang.String-double-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zadd(key, score, member);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zadd(String key, double score, String member, ZAddParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zadd-java.lang.String-double-java.lang.String-redis.clients.jedis.params.sortedset.ZAddParams-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zadd(key, score, member, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zadd(String key, Map<String, Double> scoreMembers) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zadd-java.lang.String-java.util.Map-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zadd(key, scoreMembers);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zadd(String key, Map<String, Double> scoreMembers, ZAddParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zadd-java.lang.String-java.util.Map-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zadd", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zadd(key, scoreMembers, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zcard(String key) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zcard-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zcard", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zcard(key);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zcount(String key, double min, double max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zcount-java.lang.String-double-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zcount", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zcount(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zcount(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zcount-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zcount", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zcount(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Double zincrby(String key, double score, String member) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zincrby-java.lang.String-double-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zincrby", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zincrby(key, score, member);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Double zincrby(String key, double score, String member, ZIncrByParams params) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zincrby-java.lang.String-double-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zincrby", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zincrby(key, score, member, params);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zinterstore(String dstkey, String... sets) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zinterstore-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zinterstore", dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zinterstore(dstkey, sets);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zinterstore(String dstkey, ZParams params, String... sets) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zinterstore-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zinterstore", dstkey);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zinterstore(dstkey, params, sets);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zlexcount(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zlexcount-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zlexcount", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zlexcount(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrange(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrange-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrange", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrange(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrangeByLex(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByLex-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrangeByLex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByLex(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrangeByLex(String key, String min, String max, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByLex-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrangeByLex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByLex(key, min, max, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrangeByScore(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScore-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScore(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrangeByScore(String key, String min, String max, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScore-java.lang.String-double-double-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScore(key, min, max, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrangeByScoreWithScores(String key, double min, double max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScoreWithScores-java.lang.String-double-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScoreWithScores(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrangeByScoreWithScores(
+      String key, double min, double max, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScoreWithScores-java.lang.String-double-double-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScoreWithScores(key, min, max, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrangeByScoreWithScores(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScoreWithScores-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScoreWithScores(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrangeByScoreWithScores(
+      String key, String min, String max, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeByScoreWithScores-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeByScoreWithScores(key, min, max, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrangeWithScores(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrangeWithScores-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrangeWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrangeWithScores(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zrank(String key, String member) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrank-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrank", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrank(key, member);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zrem(String key, String... members) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrem-java.lang.String-java.lang.String...-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrem", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrem(key, members);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zremrangeByLex(String key, String min, String max) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zremrangeByLex-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zremrangeByLex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zremrangeByLex(key, min, max);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zremrangeByRank(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zremrangeByRank-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zremrangeByRank", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zremrangeByRank(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zremrangeByScore(String key, double start, double end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zremrangeByScore-java.lang.String-double-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zremrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zremrangeByScore(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Long zremrangeByScore(String key, String start, String end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zremrangeByScore-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zremrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zremrangeByScore(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrange(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrange-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrevrange", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrange(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByLex(String key, String max, String min) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByLex-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrevrangeByLex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByLex(key, max, min);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByLex(String key, String max, String min, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByLex-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zrevrangeByLex", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByLex(key, max, min, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByScore(String key, double max, double min) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScore-java.lang.String-double-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScore(key, max, min);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByScore(String key, double max, double min, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScore-java.lang.String-double-double-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScore(key, max, min, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByScore(String key, String max, String min) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScore-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScore(key, max, min);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<String> zrevrangeByScore(String key, String max, String min, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByLex-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScore", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScore(key, max, min, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScoreWithScores-java.lang.String-double-double-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScoreWithScores(key, max, min);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrevrangeByScoreWithScores(
+      String key, double max, double min, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScoreWithScores-java.lang.String-double-double-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScoreWithScores-java.lang.String-java.lang.String-java.lang.String-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScoreWithScores(key, max, min);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrevrangeByScoreWithScores(
+      String key, String max, String min, int offset, int count) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeByScoreWithScores-java.lang.String-java.lang.String-java.lang.String-int-int-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeByScoreWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
+  public Set<Tuple> zrevrangeWithScores(String key, long start, long end) {
+    // This method makes a call over the network.
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrangeWithScores-java.lang.String-long-long-
+    TrackingOperation trackingOperation =
+        Observability.createRoundtripTrackingSpan(
+            "redis.clients.jedis.Jedis.zrevrangeWithScores", key);
+
+    try (Scope ws = trackingOperation.withSpan()) {
+      return super.zrevrangeByScoreWithScores(key, start, end);
+    } catch (Exception e) {
+      trackingOperation.recordException(e);
+      throw e;
+    } finally {
+      trackingOperation.end();
+    }
+  }
+
+  @Override
   public Long zrevrank(String key, String member) {
     // This method makes a call over the network.
     // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zrevrank-java.lang.String-java.lang.String-
@@ -1231,7 +3973,7 @@ public class OcWrapJedis extends Jedis {
   @Override
   public ScanResult<Tuple> zscan(String key, String cursor) {
     // This method makes a call over the network.
-    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zscan-java.lang.String-java.lang.String-redis.clients.jedis.ScanParams-
+    // https://static.javadoc.io/redis.clients/jedis/2.9.0/redis/clients/jedis/Jedis.html#zscan-java.lang.String-java.lang.String-
     TrackingOperation trackingOperation =
         Observability.createRoundtripTrackingSpan("redis.clients.jedis.Jedis.zscan", key);
 
